@@ -367,8 +367,20 @@ _mac_terminal_bundle_id() {
     zed)            echo "dev.zed.Zed" ;;
     vscode)
       # IDE embedded terminal (Cursor, VS Code, Windsurf all set TERM_PROGRAM=vscode).
-      # Async hooks are orphaned from the process tree, so _mac_ide_pid() won't find
-      # the IDE. Instead, check which IDE is actually running and return its bundle ID.
+      # Check per-session cache first (written on first hook event via process tree).
+      if [ -n "${SESSION_ID:-}" ] && [ -f "$PEON_DIR/.bundle_cache_$SESSION_ID" ]; then
+        cat "$PEON_DIR/.bundle_cache_$SESSION_ID"
+        return
+      fi
+      # Fallback: try process tree (works when hook is not orphaned)
+      local _ide_pid_check
+      _ide_pid_check="$(_mac_ide_pid)"
+      if [ "${_ide_pid_check:-0}" != "0" ]; then
+        local _pid_bid
+        _pid_bid="$(_mac_bundle_id_from_pid "$_ide_pid_check")"
+        [ -n "$_pid_bid" ] && { echo "$_pid_bid"; return; }
+      fi
+      # Last resort: check which IDE is running globally
       local _bid
       for _candidate in Cursor "Code" Windsurf; do
         _bid=$(osascript -e "tell application \"System Events\" to get bundle identifier of first process whose name is \"$_candidate\"" 2>/dev/null) && [ -n "$_bid" ] && { echo "$_bid"; return; }
@@ -2691,6 +2703,7 @@ print('ICON_PATH=' + q(icon_path))
 print('TRAINER_SOUND=' + q(trainer_sound))
 print('TRAINER_MSG=' + q(trainer_msg))
 print('TAB_COLOR_RGB=' + q(tab_color_rgb))
+print('SESSION_ID=' + q(session_id))
 " <<< "$INPUT" 2>/dev/null)"
 
 # If Python signalled early exit (disabled, agent, unknown event), bail out
@@ -2699,6 +2712,19 @@ print('TAB_COLOR_RGB=' + q(tab_color_rgb))
 HEADPHONES_DETECTED=true
 if [ "${HEADPHONES_ONLY:-false}" = "true" ]; then
   detect_headphones || HEADPHONES_DETECTED=false
+fi
+
+# Cache click-to-focus bundle ID on first event per session (process tree is available
+# for all hook events since the parent chain leads back to the IDE).
+if [ "$PLATFORM" = "mac" ] && [ -n "${SESSION_ID:-}" ] && [ "${TERM_PROGRAM:-}" = "vscode" ] \
+   && [ ! -f "$PEON_DIR/.bundle_cache_$SESSION_ID" ]; then
+  _ide_pid="$(_mac_ide_pid)"
+  if [ "${_ide_pid:-0}" != "0" ]; then
+    _cached_bid="$(_mac_bundle_id_from_pid "$_ide_pid")"
+    [ -n "$_cached_bid" ] && printf '%s' "$_cached_bid" > "$PEON_DIR/.bundle_cache_$SESSION_ID"
+  fi
+  # Clean stale bundle cache files (older than 7 days)
+  find "$PEON_DIR" -maxdepth 1 -name '.bundle_cache_*' -mtime +7 -delete 2>/dev/null || true
 fi
 
 # --- Check for updates (SessionStart only, once per day, non-blocking) ---
