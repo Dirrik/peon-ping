@@ -5,6 +5,7 @@ import { ScFirebatPreview } from "./ScFirebatPreview";
 import { ScMedicPreview } from "./ScMedicPreview";
 import { ScScvPreview } from "./ScScvPreview";
 import { ArnoldPreview } from "./ArnoldPreview";
+import { Wc2SapperPreview } from "./Wc2SapperPreview";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -52,6 +53,14 @@ export const RemotionRoot: React.FC = () => {
       <Composition
         id="ArnoldPreview"
         component={ArnoldPreview}
+        durationInFrames={840}
+        fps={30}
+        width={1080}
+        height={1080}
+      />
+      <Composition
+        id="Wc2SapperPreview"
+        component={Wc2SapperPreview}
         durationInFrames={840}
         fps={30}
         width={1080}
