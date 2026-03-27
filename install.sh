@@ -830,6 +830,23 @@ if [ "$NO_RC" = false ]; then
   fi
 fi
 
+# --- Install PATH shim (global install) ---
+# Ensure `peon` works immediately even when shell rc files are not modified,
+# missing, or not yet reloaded in the current terminal session.
+if [ "$LOCAL_MODE" = false ]; then
+  USER_BIN="$HOME/.local/bin"
+  USER_SHIM="$USER_BIN/peon"
+  mkdir -p "$USER_BIN"
+  ln -sf "$INSTALL_DIR/peon.sh" "$USER_SHIM"
+  chmod +x "$INSTALL_DIR/peon.sh" "$USER_SHIM" 2>/dev/null || true
+  if command -v peon >/dev/null 2>&1; then
+    echo "Installed peon command at $USER_SHIM"
+  else
+    echo "Installed peon command at $USER_SHIM"
+    echo "Note: add $USER_BIN to PATH if 'peon' is not found in new terminals."
+  fi
+fi
+
 # --- Verify sounds are installed ---
 if [ -n "$CUSTOM_PACKS" ]; then
   VERIFY_PACKS=$(echo "$CUSTOM_PACKS" | tr ',' ' ')
