@@ -194,3 +194,67 @@ Completed immediately — sprint definition card, no code deliverables.
 ---
 
 ## Batch 4: Planner follow-up cards (5A + 5B + 5C)
+
+### Executors (parallel)
+
+- gtuv06 (5A): commit 615573d — extract Resolve-TemplateKey in install.ps1 (tool uses: 85, killed+retried)
+- 02x5jy (5B): commit ef63b3b — consolidate PEON_TEST into _PEON_SYNC flag (tool uses: 60)
+- zxp2my (5C): commit fe25812 — test ordering assertions, speak-only debug log, flat auto-detect (tool uses: 53)
+- Merge: gtuv06 clean, 02x5jy had conflict in peon.sh (resolved: kept _PEON_SYNC + TTS writes), zxp2my clean
+- Post-merge tests: Pester 420 passed, 0 failed
+
+### Reviewers (parallel)
+
+- gtuv06: APPROVAL (1 non-blocking: fragile regex in Pester test)
+- 02x5jy: APPROVAL (no follow-ups)
+- zxp2my: APPROVAL (2 non-blocking: L1 BATS test for debug log, L2 sync comment)
+
+### Routers (parallel)
+
+- gtuv06: APPROVAL — close-out (router failed twice on missing review file, handled manually)
+- 02x5jy: APPROVAL — close-out
+- zxp2my: APPROVAL — close-out + planner (1 card: 09ynpe step 5D)
+
+### Close-outs + Planner (parallel)
+
+- gtuv06: done (45/45 checkboxes)
+- 02x5jy: done (45/45 checkboxes)
+- zxp2my: done (45/45 checkboxes, L2 sync comment committed as 7a6c0e3)
+- Planner: created 09ynpe (step 5D, BATS test for speak-only debug log)
+
+---
+
+## Batch 5: Step 5D — 09ynpe
+
+### Executor (TTSINTEG-09ynpe-executor-1)
+
+- Commit: 47ed0b3
+- Branch: worktree-agent-afa1ecdc (merged, cleaned up)
+- Files changed: tests/tts.bats (+22 lines, 2 test cases)
+- Tool uses: 41
+
+### Reviewer (TTSINTEG-09ynpe-reviewer-1)
+
+- Verdict: APPROVAL — no blockers, no follow-ups
+- Tool uses: 27
+
+### Router (TTSINTEG-09ynpe-router-1)
+
+- Verdict: APPROVAL — close-out, no planner work
+- Tool uses: 20
+
+### Close-out (TTSINTEG-09ynpe-closeout-1)
+
+- Card completed: 19/19 checkboxes
+
+---
+
+## Phase 5: Sprint Close-out
+
+- All 10 TTSINTEG cards completed and archived
+- 14 total cards archived (includes 4 pre-existing done cards from other sprints)
+- No planner items remaining
+- Sprint branch: sprint/TTSINTEG
+- Rework cycles: 1 (s81ofk)
+- Total agent dispatches: ~40
+- Total Pester tests at completion: 420 (all passing)

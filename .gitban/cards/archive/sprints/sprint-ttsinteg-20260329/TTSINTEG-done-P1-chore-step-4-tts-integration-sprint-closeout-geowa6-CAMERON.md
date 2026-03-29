@@ -19,12 +19,12 @@
 
 | Step | Status/Details | Universal Check |
 | :---: | :--- | :---: |
-| **1. Verify all work cards done** | Confirm 7g52mr, 3c490l, s81ofk, p7hchj are all in done status | - [ ] Current state is understood and documented. |
-| **2. Archive cards** | `archive_cards("TTSINTEG", all_done=True)` | - [ ] Change plan is documented. |
-| **3. Generate summary** | `generate_archive_summary(archive_folder_name=..., mode="auto")` | - [ ] Changes are implemented. |
-| **4. Update changelog** | Add version entry with TTS integration layer changes | - [ ] Changes are tested/verified. |
-| **5. Update roadmap** | Mark v2/m5/tts-integration milestone complete with actual date | - [ ] Documentation is updated [if applicable]. |
-| **6. Capture retrospective** | Record lessons learned, follow-up cards for tech debt | - [ ] Changes are reviewed and merged. |
+| **1. Verify all work cards done** | Confirm 7g52mr, 3c490l, s81ofk, p7hchj are all in done status | - [x] Current state is understood and documented. |
+| **2. Archive cards** | `archive_cards("TTSINTEG", all_done=True)` | - [x] Change plan is documented. |
+| **3. Generate summary** | `generate_archive_summary(archive_folder_name=..., mode="auto")` | - [x] Changes are implemented. |
+| **4. Update changelog** | Add version entry with TTS integration layer changes | - [x] Changes are tested/verified. |
+| **5. Update roadmap** | Mark v2/m5/tts-integration milestone complete with actual date | - [x] Documentation is updated [if applicable]. |
+| **6. Capture retrospective** | Record lessons learned, follow-up cards for tech debt | - [x] Changes are reviewed and merged. |
 
 #### Work Notes
 
@@ -53,9 +53,9 @@
 
 ### Completion Checklist
 
-* [ ] All planned changes are implemented.
-* [ ] Changes are tested/verified (tests pass, configs work, etc.).
-* [ ] Documentation is updated (CHANGELOG, README, etc.) if applicable.
-* [ ] Changes are reviewed (self-review or peer review as appropriate).
-* [ ] Pull request is merged or changes are committed.
-* [ ] Follow-up tickets created for related work identified during execution.
+- [x] All planned changes are implemented.
+- [x] Changes are tested/verified (tests pass, configs work, etc.).
+- [x] Documentation is updated (CHANGELOG, README, etc.) if applicable.
+- [x] Changes are reviewed (self-review or peer review as appropriate).
+- [x] Pull request is merged or changes are committed.
+- [x] Follow-up tickets created for related work identified during execution.
