@@ -2112,6 +2112,8 @@ if ($category) {
 
 # --- TTS config (read before skipSound gate so trainer TTS can use it) ---
 $ttsCfg = if ($config.tts) { $config.tts } else { @{} }
+# Note: $paused guard is handled implicitly by the early-exit when $config.enabled = false
+# (see top of hook block), rather than explicitly checked here.
 $ttsEnabled = ($ttsCfg.enabled -eq $true)
 $ttsBackend = if ($ttsCfg.backend) { $ttsCfg.backend } else { "auto" }
 $ttsVoice = if ($ttsCfg.voice) { $ttsCfg.voice } else { "default" }
@@ -2291,7 +2293,11 @@ if ($ttsEnabled -and $category) {
         $speechTpl = "{project} " + [char]0x2014 + " {status}"
     }
 
-    # Build template variables (same set as notification templates)
+    # Build template variables (same set as notification templates).
+    # NOTE: This duplicates the variable construction from the notification template
+    # rendering block (~lines 1710-1725). Intentional for now to keep TTS text
+    # resolution self-contained. If this area is touched again, consolidate into
+    # a shared $tplVars hashtable built once and reused by both paths.
     $tplSummary = if ($event.transcript_summary) { [string]$event.transcript_summary } else { '' }
     if ($tplSummary -and $tplSummary.Length -gt 120) { $tplSummary = $tplSummary.Substring(0, 120) }
     $tplToolName = if ($event.tool_name) { [string]$event.tool_name } else { '' }
@@ -2324,8 +2330,13 @@ function Play-Sound {
         Start-Process -FilePath "powershell.exe" -ArgumentList "-NoProfile", "-NonInteractive", "-File", $winPlayScript, "-path", $SndPath, "-vol", $Vol -WindowStyle Hidden
         & $peonLog 'play' @{ backend = 'win-play.ps1'; file = $soundFile; volume = [string]$Vol }
     } else {
-        if ($peonDebug) { Write-Warning "peon-ping: win-play.ps1 not found at '$winPlayScript' - audio skipped" }
-        & $peonLog 'play' @{ error = "win-play.ps1 not found"; backend = 'none' }
+        if (-not (Test-Path $winPlayScript)) {
+            if ($peonDebug) { Write-Warning "peon-ping: win-play.ps1 not found at '$winPlayScript' - audio skipped" }
+            & $peonLog 'play' @{ error = "win-play.ps1 not found"; backend = 'none' }
+        } elseif (-not (Test-Path $SndPath)) {
+            if ($peonDebug) { Write-Warning "peon-ping: sound file not found at '$SndPath' - audio skipped" }
+            & $peonLog 'play' @{ error = "sound file not found"; backend = 'none' }
+        }
     }
 }
 
