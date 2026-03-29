@@ -411,7 +411,7 @@ _resolve_tts_backend() {
       # Probe in priority order: prefer premium when installed.
       # Each candidate is resolved inline (no recursive self-call).
       local candidate
-      for candidate in tts-elevenlabs.sh tts-piper.sh tts-native.sh; do
+      for candidate in tts-elevenlabs.sh tts-piper.sh tts-native.sh; do  # keep in sync with named cases above
         find_bundled_script "$candidate" >/dev/null 2>&1 || continue
         echo "$candidate" && return 0
       done
