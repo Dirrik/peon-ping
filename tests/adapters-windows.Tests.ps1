@@ -1470,6 +1470,7 @@ Describe "install.ps1 Default Config" {
         $script:installContent | Should -Match 'backend = "auto"'
         $script:installContent | Should -Match 'voice = "default"'
         $script:installContent | Should -Match 'rate = 1\.0'
+        $script:installContent | Should -Match 'volume = 0\.5'
         $script:installContent | Should -Match 'mode = "sound-then-speak"'
     }
 
