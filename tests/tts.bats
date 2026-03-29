@@ -44,6 +44,13 @@ teardown() {
   [ "$PEON_EXIT" -eq 0 ]
   afplay_was_called
   tts_was_called
+  # Verify ordering: afplay must appear before tts in the combined log
+  local order
+  order="$(call_order)"
+  local afplay_line tts_line
+  afplay_line=$(echo "$order" | grep -n "afplay" | head -1 | cut -d: -f1)
+  tts_line=$(echo "$order" | grep -n "tts" | head -1 | cut -d: -f1)
+  [ "$afplay_line" -lt "$tts_line" ]
 }
 
 @test "TTS: speak-only mode skips play_sound entirely" {
@@ -58,6 +65,13 @@ teardown() {
   [ "$PEON_EXIT" -eq 0 ]
   afplay_was_called
   tts_was_called
+  # Verify ordering: tts must appear before afplay in the combined log
+  local order
+  order="$(call_order)"
+  local afplay_line tts_line
+  afplay_line=$(echo "$order" | grep -n "afplay" | head -1 | cut -d: -f1)
+  tts_line=$(echo "$order" | grep -n "tts" | head -1 | cut -d: -f1)
+  [ "$tts_line" -lt "$afplay_line" ]
 }
 
 # ============================================================

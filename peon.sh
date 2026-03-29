@@ -409,11 +409,11 @@ _resolve_tts_backend() {
     piper)      echo "tts-piper.sh" ;;
     auto)
       # Probe in priority order: prefer premium when installed.
-      local b script_name
-      for b in elevenlabs piper native; do
-        script_name="$(_resolve_tts_backend "$b")" || continue
-        find_bundled_script "$script_name" >/dev/null 2>&1 || continue
-        echo "$script_name" && return 0
+      # Each candidate is resolved inline (no recursive self-call).
+      local candidate
+      for candidate in tts-elevenlabs.sh tts-piper.sh tts-native.sh; do
+        find_bundled_script "$candidate" >/dev/null 2>&1 || continue
+        echo "$candidate" && return 0
       done
       return 1  # no backend available
       ;;
@@ -4533,7 +4533,11 @@ _run_sound_and_notify() {
         [ "$_do_tts" = "true" ] && speak "$TTS_TEXT"
         ;;
       speak-only)
-        [ "$_do_tts" = "true" ] && speak "$TTS_TEXT"
+        if [ "$_do_tts" = "true" ]; then
+          speak "$TTS_TEXT"
+        else
+          [ "${PEON_DEBUG:-0}" = "1" ] && echo "[tts] speak-only mode but TTS unavailable (enabled=${TTS_ENABLED:-false}, text='${TTS_TEXT:-}')" >&2
+        fi
         ;;
       speak-then-sound)
         [ "$_do_tts" = "true" ] && speak "$TTS_TEXT"

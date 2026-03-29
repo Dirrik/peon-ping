@@ -123,6 +123,7 @@ JSON
   cat > "$MOCK_BIN/afplay" <<'SCRIPT'
 #!/bin/bash
 echo "$@" >> "${CLAUDE_PEON_DIR}/afplay.log"
+echo "afplay" >> "${CLAUDE_PEON_DIR}/call_order.log"
 SCRIPT
   chmod +x "$MOCK_BIN/afplay"
 
@@ -389,6 +390,7 @@ install_mock_tts_backend() {
 # Mock TTS backend: logs voice, rate, volume args and stdin text
 text=$(cat)
 echo "voice=$1 rate=$2 vol=$3 text=$text" >> "${CLAUDE_PEON_DIR}/tts.log"
+echo "tts" >> "${CLAUDE_PEON_DIR}/call_order.log"
 SCRIPT
   chmod +x "$TEST_DIR/scripts/tts-native.sh"
 }
@@ -404,6 +406,14 @@ tts_call_count() {
     wc -l < "$TEST_DIR/tts.log" | tr -d ' '
   else
     echo "0"
+  fi
+}
+
+# Helper: get call ordering (reads combined call_order.log)
+# Returns lines like "afplay\ntts" — callers compare line positions.
+call_order() {
+  if [ -f "$TEST_DIR/call_order.log" ]; then
+    cat "$TEST_DIR/call_order.log"
   fi
 }
 
