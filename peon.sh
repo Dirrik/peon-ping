@@ -434,14 +434,22 @@ speak() {
   # _resolve_tts_backend returns a script filename (e.g., "tts-native.sh").
   # find_bundled_script resolves it to an absolute path.
   local script_name
-  script_name="$(_resolve_tts_backend "${TTS_BACKEND:-auto}")" || return 0
+  script_name="$(_resolve_tts_backend "${TTS_BACKEND:-auto}")" || {
+    [ "${PEON_DEBUG:-0}" = "1" ] && echo "[tts] no backend resolved for '${TTS_BACKEND:-auto}'" >&2
+    return 0
+  }
   local abs_script
-  abs_script="$(find_bundled_script "$script_name")" 2>/dev/null || return 0
+  abs_script="$(find_bundled_script "$script_name")" 2>/dev/null || {
+    [ "${PEON_DEBUG:-0}" = "1" ] && echo "[tts] backend script '$script_name' not found" >&2
+    return 0
+  }
   [ -x "$abs_script" ] || return 0
 
   local voice="${TTS_VOICE:-default}"
   local rate="${TTS_RATE:-1.0}"
   local vol="${TTS_VOLUME:-0.5}"
+
+  [ "${PEON_DEBUG:-0}" = "1" ] && echo "[tts] speak: backend=$script_name voice=$voice rate=$rate vol=$vol text='${text:0:60}'" >&2
 
   if [ "${PEON_TEST:-0}" = "1" ]; then
     printf '%s\n' "$text" | "$abs_script" "$voice" "$rate" "$vol" >/dev/null 2>&1
@@ -452,6 +460,7 @@ speak() {
     nohup sh -c 'printf "%s\n" "$0" | "$1" "$2" "$3" "$4"' \
       "$text" "$abs_script" "$voice" "$rate" "$vol" >/dev/null 2>&1 &
     save_tts_pid $!
+    [ "${PEON_DEBUG:-0}" = "1" ] && echo "[tts] started PID $!" >&2
   fi
 }
 
