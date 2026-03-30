@@ -1378,6 +1378,44 @@ if ($Command) {
                 }
             }
         }
+        "^--update$" {
+            Write-Host "Updating peon-ping..." -ForegroundColor Cyan
+            # Migrate config keys (active_pack → default_pack, agentskill → session_override)
+            $cfgObj = Get-PeonConfigRaw $ConfigPath | ConvertFrom-Json
+            $changed = $false
+            if ($cfgObj.PSObject.Properties['active_pack'] -and -not $cfgObj.PSObject.Properties['default_pack']) {
+                $cfgObj | Add-Member -NotePropertyName 'default_pack' -NotePropertyValue $cfgObj.active_pack -Force
+                $cfgObj.PSObject.Properties.Remove('active_pack')
+                $changed = $true
+            } elseif ($cfgObj.PSObject.Properties['active_pack']) {
+                $cfgObj.PSObject.Properties.Remove('active_pack')
+                $changed = $true
+            }
+            if ($cfgObj.pack_rotation_mode -eq 'agentskill') {
+                $cfgObj.pack_rotation_mode = 'session_override'
+                $changed = $true
+            }
+            if ($changed) {
+                $cfgObj | ConvertTo-Json -Depth 10 | Set-Content $ConfigPath -Encoding UTF8
+                Write-Host "peon-ping: config migrated (active_pack -> default_pack, agentskill -> session_override)" -ForegroundColor Green
+            }
+            # Re-run install.ps1 from a temp directory. Download install-utils.ps1
+            # alongside it so the dot-source resolves correctly via $PSScriptRoot.
+            $tempDir = Join-Path $env:TEMP "peon-ping-update"
+            $tempScriptsDir = Join-Path $tempDir "scripts"
+            New-Item -ItemType Directory -Path $tempScriptsDir -Force | Out-Null
+            try {
+                $base = "https://raw.githubusercontent.com/PeonPing/peon-ping/main"
+                Invoke-WebRequest -Uri "$base/install.ps1" -OutFile (Join-Path $tempDir "install.ps1") -UseBasicParsing -ErrorAction Stop
+                Invoke-WebRequest -Uri "$base/scripts/install-utils.ps1" -OutFile (Join-Path $tempScriptsDir "install-utils.ps1") -UseBasicParsing -ErrorAction Stop
+                & powershell -NoProfile -File (Join-Path $tempDir "install.ps1")
+            } catch {
+                Write-Host "Error: Could not download installer. Check your internet connection." -ForegroundColor Red
+            } finally {
+                Remove-Item $tempDir -Recurse -Force -ErrorAction SilentlyContinue
+            }
+            return
+        }
         "^--help$" {
             Write-Host "peon-ping commands:" -ForegroundColor Cyan
             Write-Host "  --toggle              Toggle enabled/paused"
@@ -1387,6 +1425,7 @@ if ($Command) {
             Write-Host "  --unmute              Alias for --resume"
             Write-Host "  --status              Show current status"
             Write-Host "  --volume N            Set volume (0.0-1.0)"
+            Write-Host "  --update              Update peon-ping (migrate config + reinstall)"
             Write-Host "  --help                Show this help"
             Write-Host ""
             Write-Host "Pack management:" -ForegroundColor Cyan

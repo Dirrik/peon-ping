@@ -1258,6 +1258,13 @@ Describe "Embedded peon.ps1 Hook Script" {
         $script:peonHookContent | Should -Match '--help'
     }
 
+    It "supports --update CLI command with config migration" {
+        $script:peonHookContent | Should -Match '--update'
+        $script:peonHookContent | Should -Match 'active_pack'
+        $script:peonHookContent | Should -Match 'default_pack'
+        $script:peonHookContent | Should -Match 'Updating peon-ping'
+    }
+
     # --- State Persistence ---
 
     It "reads and writes .state.json" {
