@@ -1,3 +1,8 @@
+## v2.17.2 (2026-03-29)
+
+### Fixed
+- **WezTerm click-to-focus** — added WezTerm bundle ID (`com.github.wez.wezterm`) to `_mac_terminal_bundle_id()` so click-to-focus works in `standard` notification mode on macOS. Fixes #417.
+
 ## v2.17.1 (2026-03-29)
 
 ### Fixed
