@@ -10,18 +10,18 @@ $peonDebug = $env:PEON_DEBUG -eq "1"
 
 function Invoke-NativeMediaPlayback {
     param(
-        [Parameter(Mandatory = $true)][string]$Path,
-        [Parameter(Mandatory = $true)][double]$Volume
+        [Parameter(Mandatory = $true)][string]$path,
+        [Parameter(Mandatory = $true)][double]$vol
     )
 
     try {
         Add-Type -AssemblyName PresentationCore
         $player = [System.Windows.Media.MediaPlayer]::new()
-        $player.Volume = $Volume
+        $player.Volume = $vol
 
         Register-ObjectEvent -InputObject $player -EventName MediaOpened -SourceIdentifier MediaOpened | Out-Null
         Register-ObjectEvent -InputObject $player -EventName MediaFailed -SourceIdentifier MediaFailed | Out-Null
-        $player.Open([uri]::new($Path))
+        $player.Open([uri]::new($path))
         $player.Play()
 
         # Pump WPF dispatcher so MediaOpened/MediaFailed events fire in this console process
@@ -36,7 +36,7 @@ function Invoke-NativeMediaPlayback {
             $failEvt = Get-Event -SourceIdentifier MediaFailed -ErrorAction SilentlyContinue
             if ($failEvt) {
                 $failed = $true
-                if ($peonDebug) { Write-Warning "peon-ping: native playback failed for '$Path': $($failEvt.SourceEventArgs.ErrorException)" }
+                if ($peonDebug) { Write-Warning "peon-ping: native playback failed for '$path': $($failEvt.SourceEventArgs.ErrorException)" }
                 break
             }
             $evt = Get-Event -SourceIdentifier MediaOpened -ErrorAction SilentlyContinue
@@ -50,7 +50,7 @@ function Invoke-NativeMediaPlayback {
         # Timeout: neither MediaOpened nor MediaFailed fired — treat as failure
         if (-not $failed -and -not $evt) {
             $failed = $true
-            if ($peonDebug) { Write-Warning "peon-ping: native playback failed for '$Path': timed out waiting for media events" }
+            if ($peonDebug) { Write-Warning "peon-ping: native playback failed for '$path': timed out waiting for media events" }
         }
 
         # Wait for playback to finish (only if opened successfully)
@@ -65,7 +65,7 @@ function Invoke-NativeMediaPlayback {
 
         return (-not $failed -and $opened)
     } catch {
-        if ($peonDebug) { Write-Warning "peon-ping: native playback failed for '$Path': $_" }
+        if ($peonDebug) { Write-Warning "peon-ping: native playback failed for '$path': $_" }
     }
 
     return $false
